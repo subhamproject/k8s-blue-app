@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ${DEPLOY_NAME}
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      service: ${DEPLOY_NAME}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  minReadySeconds: 5
+  template:
+    metadata:
+      labels:
+        service: ${DEPLOY_NAME}
+    spec:
+      containers:
+      - name: app
+        image: ${IMAGE_NAME}
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 80
+        env:
+          - name: POD_NAME
+            valueFrom:
+             fieldRef:
+               fieldPath: metadata.name
+          - name: HOST_NAME
+            valueFrom:
+             fieldRef:
+               fieldPath: spec.nodeName
+          - name: NS_NAME
+            valueFrom:
+              fieldRef:
+               fieldPath: metadata.namespace
+          - name: POD_IP
+            valueFrom:
+              fieldRef:
+               fieldPath: status.podIP
+          - name: NODE_IP
+            valueFrom:
+              fieldRef:
+                fieldPath: status.hostIP
+        resources:
+         limits:
+           cpu: 500m
+         requests:
+           cpu: 200m
+        readinessProbe:
+           tcpSocket:
+            host:
+            port: 80
+           initialDelaySeconds: 15
+           periodSeconds: 10
+           timeoutSeconds: 10
+           successThreshold: 1
+           failureThreshold: 1
+        livenessProbe:
+           tcpSocket:
+            host:
+            port: 80
+           initialDelaySeconds: 15
+           periodSeconds: 10
+           timeoutSeconds: 10
+           successThreshold: 1
+           failureThreshold: 1
+        startupProbe:
+           tcpSocket:
+            host:
+            port: 80
+           initialDelaySeconds: 15
+           periodSeconds: 5
+           timeoutSeconds: 10
+           successThreshold: 1
+           failureThreshold: 1
+      terminationGracePeriodSeconds: 30

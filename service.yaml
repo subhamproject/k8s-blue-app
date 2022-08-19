@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+ name: ${DEPLOY_NAME}-service
+ labels:
+   service: ${DEPLOY_NAME}-service
+spec:
+ ports:
+ - port: 80
+ selector:
+   service: ${DEPLOY_NAME}
