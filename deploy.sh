@@ -30,6 +30,7 @@ fi
 
 
 if [[ $CURRENT_IMAGE != $IMAGE_NAME ]];then
+echo "Deploying image: $IMAGE_NAME"
 envsubst < deployment.yaml |kubectl apply -f -
 fi
 
